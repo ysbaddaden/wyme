@@ -15,10 +15,13 @@ WYME.prototype =
     this.buildContents();
     
     this.textarea.style.display = 'none';
-    this.textarea.parentNode.appendChild(this.editor);
+    this.textarea.parentNode.insertAfter(this.editor, this.textarea);
     this.editor.appendChild(this.textarea);
     
-    this.attachEvents();
+    this.textarea.addEventListener('keyup',    this.updateContents.bind(this), false);
+    this.contents.addEventListener('keydown',  this.onkeydown.bind(this), false);
+    this.contents.addEventListener('keyup',    this.onkeyup.bind(this), false);
+    this.toolbar.addEventListener('mousedown', this.ontoolbarmousedown.bind(this), false);
   },
 
   buildContents: function()
@@ -49,8 +52,6 @@ WYME.prototype =
     
     this.buildToolbarButton('<b>bold</b>', 'bold');
     this.buildToolbarButton('<i>italic</i>', 'italic');
-//    this.buildToolbarButton('ul',     'ul');
-//    this.buildToolbarButton('ol',     'ol');
     this.buildToolbarButton('link', 'createLink');
     this.buildToolbarButton('image', 'insertImage');
     
@@ -64,12 +65,6 @@ WYME.prototype =
     btn.setAttribute('data-command', command);
     btn.innerHTML = text;
     this.toolbar.appendChild(btn);
-  },
-
-  attachEvents: function()
-  {
-    this.contents.addEventListener('keyup',    this.onkeyup.bind(this),    false);
-    this.toolbar.addEventListener('mousedown', this.ontoolbarmousedown.bind(this), false);
   },
 
   // helpers
@@ -101,7 +96,29 @@ WYME.prototype =
     }.bind(this), 200);
   },
 
+  updateContents: function()
+  {
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
+    
+    this.timer = setTimeout(function() {
+      this.contents.innerHTML = this.textarea.value;
+    }.bind(this), 200);
+  },
+
   // content editable events
+
+  onkeydown: function(evt)
+  {
+    // prevents deletion of minimum P element (which would lead to have a DIV).
+    if (evt.keyCode == 8)
+    {
+      if (this.contents.innerHTML.trim() == '<p><br></p>') {
+        evt.preventDefault();
+      }
+    }
+  },
 
   onkeyup: function(evt) {
     this.updateTextarea();
@@ -109,8 +126,12 @@ WYME.prototype =
 
   // toolbar events
 
-  // Executed on toolbar button click. Checks if current selection is a child
-  // of this editor before executing the command.
+  /**
+   * Executed on toolbar button click.
+   * 
+   * Checks if current selection is a child of this editor before
+   * executing the command.
+   */
   ontoolbarmousedown: function(evt)
   {
     var parent = window.getSelection().anchorNode;
@@ -128,7 +149,7 @@ WYME.prototype =
         if (btn && btn.hasAttribute('data-command'))
         {
           this.execToolbarCommand(btn.getAttribute('data-command'));
-          event.preventDefault();
+          evt.preventDefault();
         }
       }
     }
@@ -171,20 +192,20 @@ WYME.prototype =
 
   createLink: function()
   {
-    var range = document.getSelection().getRangeAt(0);
+    var range = window.getSelection().getRangeAt(0);
     var dialog = new UI.Dialog({id: "wyme-create-link"});
     
     dialog.setTitle("Insert Link");
     dialog.setContent('<form action="#">\
       <p>\
         <label for="wyme-link-url">URL</label>\
-        <input type="text" name="url" id="wyme-link-url"/>\
+        <input type="text" name="url" id="wyme-link-url" placeholder="http://"/>\
       </p>\
       <p>\
         <label for="wyme-link-title">Title</label>\
         <input type="text" name="title" id="wyme-link-title"/>\
       </p>\
-      <p>\
+      <p class="actions">\
         <input type="submit" value="OK"/>\
       </p>\
     </form>');
@@ -203,7 +224,16 @@ WYME.prototype =
         var title = form.querySelectorAll('input[name=title]').item(0).value.trim();
         if (title) link.setAttribute('title', title);
         
-        link.appendChild(range.extractContents());
+        var fragment = null;
+        
+        if (range.collapsed) {
+          fragment = document.createTextNode(url.replace(/^http:\/\//, '').replace(/\/$/, ''));
+        }
+        else {
+          fragment = range.extractContents();
+        }
+        
+        link.appendChild(fragment);
         range.insertNode(link);
         this.updateTextarea();
       }
