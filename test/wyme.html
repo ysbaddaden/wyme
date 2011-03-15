@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WYME</title>
+  <style type="text/css">
+  body { font: normal normal 14px sans-serif; }
+  form { width: 400px; margin: 2em; display: inline-block; vertical-align: top; }
+  label { font-weight: bold; color: #666; }
+  textarea { width: 100%; height: 80px;
+    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+  
+  .toolbar { padding: 5px; background: #CCC; }
+  .toolbar span { display: inline-block; min-width: 14px; padding: 2px; margin: 0 2px;
+    text-align: center; border: 1px solid #CCC; cursor: default; }
+  .toolbar span:hover { border: 1px outset #888; }
+  .toolbar select { float: right; }
+  
+  .contents { padding: 5px; border: 1px inset #000; }
+  .contents p { margin: 0 0 1em; }
+  .contents p:last-child { margin-bottom: 0; }
+  
+  .dialog { background: #FFF; -webkit-box-shadow: 0 0 10px #666; }
+  .dialog .titlebar { background: #4B7399; color: #FFF; text-align: right; padding: 2px 5px; }
+  .dialog .titlebar .title { float: left; }
+  .dialog .content { padding: 10px; }
+  
+  .dialog form { margin: 0; }
+  .dialog p:first-child { margin-top: 0; }
+  .dialog p:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+  <form action="#" method="post">
+    <div>
+      <label for="body">Empty Form</label>
+      <textarea name="body" id="body" class="wyme"></textarea>
+    </div>
+  </form>
+
+  <form action="#" method="post">
+    <div>
+      <label for="body">Filled Form</label>
+      <textarea name="body" id="body" class="wyme">
+&lt;p&gt;This is a form with a textarea that already contains some text. Yes, it does.&lt;/p&gt;
+&lt;p&gt;It even has two paragraphs.&lt;/p&gt;
+      </textarea>
+    </div>
+  </form>
+
+  <script src="../src/support/alpha.js"></script>
+  <script src="../src/wyme.js"></script>
+</body>
+</html>
