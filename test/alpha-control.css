@@ -1,4 +1,4 @@
-body { font: normal normal 14px/1.5 sans-serif; }
+body { font: normal normal 14px/1.5 sans-serif; background: #F2F1F0; color: #2C2C2C; }
 form { width: 400px; margin: 2em; display: inline-block; vertical-align: top; }
 
 label { font-weight: bold; color: #666; }

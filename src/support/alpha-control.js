@@ -663,8 +663,8 @@ var Eventable = function(object, types)
      */
     object.prototype.dispatchEvent = function(event_or_type)
     {
-      var event = (typeof event_or_type == 'string') ?
-        this.createEvent(event_or_type) : event_or_type;
+      var event = (typeof event_or_type == 'string') ? this.createEvent(event_or_type) : event_or_type;
+      event.target = this;
       
       if (typeof this['on' + event.type] == 'undefined') {
         throw new Error("No such event type '" + event.type + "'");
@@ -1110,7 +1110,7 @@ var UI = {};
 UI.Widget = function() {}
 
 Optionable(UI.Widget);
-//Eventable(UI.Widget, ['show', 'close', 'hide', 'destroy']);
+Eventable(UI.Widget, ['show', 'close', 'hide', 'destroy']);
 
 /**
  * Initializes a Widget.
@@ -1189,12 +1189,27 @@ UI.Widget.prototype.show = function()
     this.attachToDOM();
   }
   this.setPosition();
-  this.container.style.display = 'block';
+  
+  if (!this.dispatchEvent('show')) {
+    this._show();
+  }
 }
 
 // Hides the Widget.
 UI.Widget.prototype.hide = function() {
-  this._hide();
+  this._close('hide');
+}
+
+// Closes the widgets, using the +onClose+ strategy.
+UI.Widget.prototype.close = function(event)
+{
+  if (event && event.type == 'keyup' && event.keyCode != 27) return;
+  this._close(this.options.onClose);
+}
+
+// Removes the Widget from the DOM and destroys it.
+UI.Widget.prototype.destroy = function() {
+  this._close('destroy');
 }
 
 // :nodoc:
@@ -1207,23 +1222,8 @@ UI.Widget.prototype._hide = function() {
   if (this.container) this.container.style.display = 'none';
 }
 
-// Closes the widgets, using the +onClose+ strategy.
-UI.Widget.prototype.close = function(event)
-{
-  if (event && event.type == 'keyup' && event.keyCode != 27) {
-    return;
-  }
-  
-  switch(this.options.onClose)
-  {
-    case 'hide':    this.hide();    break;
-    case 'destroy': this.destroy(); break;
-    default: throw new Error("Unknown onClose option: " + this.options.onClose);
-  }
-}
-
-// Removes the Widget from the DOM and destroys it.
-UI.Widget.prototype.destroy = function()
+// :nodoc:
+UI.Widget.prototype._destroy = function()
 {
   if (this.container)
   {
@@ -1242,6 +1242,20 @@ UI.Widget.prototype.destroy = function()
   }
 }
 
+// :nodoc:
+UI.Widget.prototype._close = function(type)
+{
+  if (!this.dispatchEvent('close'))
+  {
+    switch (type)
+    {
+      case 'hide':    if (!this.dispatchEvent('hide'))    this._hide();    break;
+      case 'destroy': if (!this.dispatchEvent('destroy')) this._destroy(); break;
+      default: throw new Error("Unknown onClose option: " + type);
+    }
+  }
+}
+
 // Returns true if Widget is currently displayed, false otherwise.
 UI.Widget.prototype.displayed = function() {
   return (!!this.container && this.container.style.display != 'none');
@@ -1257,7 +1271,7 @@ UI.Overlay.prototype = new UI.Widget();
 
 UI.Overlay.prototype.initOverlay = function(options)
 {
-  this.setOptions({
+  this.setDefaultOptions({
     onClose: 'destroy',
     closeOnEscape: false
   });
@@ -1307,11 +1321,15 @@ UI.Notification.prototype.setMessage = function(html, timeout)
 {
   timeout = timeout || this.options.timeout;
   
+  if (this.timer) {
+    clearTimeout(this.timer);
+  }
+  
   this.setContent(html);
   this.show();
   
   if (timeout > 0) {
-    setTimeout(this.hide.bind(this), timeout);
+    this.timer = setTimeout(this.hide.bind(this), timeout);
   }
 }
 
@@ -1443,32 +1461,16 @@ UI.ModalDialog.prototype.initModalDialog = function(options)
   
   this.overlay = new UI.Overlay();
   this.overlay.initOverlay();
+  
+  this.addEventListener('show',    this.overlay.show.bind(this.overlay));
+  this.addEventListener('hide',    this.overlay.hide.bind(this.overlay));
+  this.addEventListener('destroy', this.overlay.destroy.bind(this.overlay));
 }
 
 UI.ModalDialog.prototype.attachToDOM = function()
 {
   this.overlay.attachToDOM();
   UI.Dialog.prototype.attachToDOM.call(this);
-}
-
-UI.ModalDialog.prototype.show = function()
-{
-  this.overlay.show();
-  UI.Dialog.prototype.show.call(this);
-}
-
-UI.ModalDialog.prototype.hide = function()
-{
-  this.overlay.hide();
-  UI.Dialog.prototype.hide.call(this);
-}
-
-UI.ModalDialog.prototype.destroy = function()
-{
-  if (this.overlay) {
-    this.overlay.destroy();
-  }
-  UI.Dialog.prototype.destroy.call(this);
 }
 
 // TODO: Add events to UI.Picker

@@ -8,6 +8,8 @@ WYME.prototype =
 {
   buildEditor: function()
   {
+    this.currentEditorType = 'html';
+    
     this.editor = document.createElement('div');
     this.editor.className = 'wyme';
     
@@ -18,10 +20,10 @@ WYME.prototype =
     this.textarea.parentNode.insertAfter(this.editor, this.textarea);
     this.editor.appendChild(this.textarea);
     
-    this.textarea.addEventListener('keyup',    this.updateContents.bind(this), false);
-    this.contents.addEventListener('keydown',  this.onkeydown.bind(this), false);
-    this.contents.addEventListener('keyup',    this.onkeyup.bind(this), false);
-    this.toolbar.addEventListener('mousedown', this.ontoolbarmousedown.bind(this), false);
+    this.textarea.addEventListener('keyup',   this.updateContents.bind(this), false);
+    
+    this.contents.addEventListener('keydown', this.onkeydown.bind(this), false);
+    this.contents.addEventListener('keyup',   this.onkeyup.bind(this), false);
   },
 
   buildContents: function()
@@ -41,63 +43,42 @@ WYME.prototype =
 
   buildToolbar: function()
   {
-    this.toolbar = document.createElement('div');
-    this.toolbar.className = 'toolbar';
+    this.toolbar = new UI.Toolbar();
+    this.toolbar.initToolbar();
     
-    var switcher = document.createElement('a');
-    switcher.className = 'switcher';
-    switcher.href = '#';
-    switcher.addEventListener('click', this.changeEditorFormat.bind(this), false);
-    switcher.setAttribute('data-value', 'source');
-    switcher.innerText = 'source';
-    this.toolbar.appendChild(switcher);
+    this.toolbar.addButton('bold',   'Bold',   this.setBold.bind(this));
+    this.toolbar.addButton('italic', 'Italic', this.setItalic.bind(this));
+    this.toolbar.addButton('link',   'Link',   this.insertLink.bind(this));
+    this.toolbar.addButton('image',  'Image',  this.insertImage.bind(this));
+    this.toolbar.addButton('toggle', 'source', this.toggleEditor.bind(this));
     
-//    var select = document.createElement('select');
-//    select.innerHTML = "<option>HTML</option><option>Source</option>";
-//    select.addEventListener('change', this.changeEditorFormat.bind(this), false);
-//    this.toolbar.appendChild(select);
+    this.toolbar.addEventListener('before', this.checkSelection.bind(this));
+//    this.toolbar.addEventListener('after',  this.popCurrentRange.bind(this));
     
-    this.buildToolbarButton('<b>bold</b>',   'bold');
-    this.buildToolbarButton('<i>italic</i>', 'italic');
-    this.buildToolbarButton('link',          'createLink');
-    this.buildToolbarButton('image',         'insertImage');
-    
-    this.editor.appendChild(this.toolbar);
-  },
-
-  buildToolbarButton: function(text, command)
-  {
-    var btn = document.createElement('span');
-    btn.className = 'button';
-    btn.setAttribute('data-command', command);
-    btn.innerHTML = text;
-    this.toolbar.appendChild(btn);
+    this.editor.appendChild(this.toolbar.getContent());
   },
 
   // helpers
 
-  changeEditorFormat: function(evt)
+  toggleEditor: function(button)
   {
-    evt.preventDefault();
-    
-    switch (evt.target.getAttribute('data-value'))
+    if (this.currentEditorType == 'html')
     {
-      case 'source':
-        evt.target.innerText = 'HTML';
-        evt.target.setAttribute('data-value', 'HTML');
-        this.textarea.style.display = 'block';
-        this.contents.style.display = 'none';
-      break;
-      
-      case 'HTML':
-        evt.target.innerText = 'source';
-        evt.target.setAttribute('data-value', 'source');
-        this.textarea.style.display = 'none';
-        this.contents.style.display = 'block';
-      break;
+      button.setText('html');
+      this.currentEditorType = 'source';
+      this.textarea.style.display = 'block';
+      this.contents.style.display = 'none';
+    }
+    else
+    {
+      button.setText('source');
+      this.currentEditorType = 'html';
+      this.textarea.style.display = 'none';
+      this.contents.style.display = 'block';
     }
   },
 
+  // Updates the textarea with the contentEditable HTML.
   updateTextarea: function()
   {
     if (this.timer) {
@@ -109,6 +90,7 @@ WYME.prototype =
     }.bind(this), 200);
   },
 
+  // Updates the contentEditable with the textarea value.
   updateContents: function()
   {
     if (this.timer) {
@@ -118,6 +100,14 @@ WYME.prototype =
     this.timer = setTimeout(function() {
       this.contents.innerHTML = this.textarea.value;
     }.bind(this), 200);
+  },
+
+  // Applies any given range.
+  setRange: function(range)
+  {
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
   },
 
   // content editable events
@@ -139,45 +129,57 @@ WYME.prototype =
 
   // toolbar events
 
-  /**
-   * Executed on toolbar button click.
-   * 
-   * Checks if current selection is a child of this editor before
-   * executing the command.
-   */
-  ontoolbarmousedown: function(evt)
+  checkSelection: function(event)
   {
+    this.prevented = false;
+    
+    // limited to the HTML editor right now
+    if (this.currentEditorType == 'source')
+    {
+      this.prevented = true;
+      return;
+    }
+    
+    // no selection = failure
+    try {
+      window.getSelection().getRangeAt(0);
+    }
+    catch (e)
+    {
+      this.prevented = true;
+      return;
+    }
+    
+    // checks if selection is within this editor
     var parent = window.getSelection().anchorNode;
     while (parent && parent.parentNode)
     {
       parent = parent.parentNode;
-      
-      if (parent == this.contents)
-      {
-        var btn = evt.target;
-        if (btn && btn.nodeName && btn.nodeName.toLowerCase() != 'span') {
-          btn = btn.get('parentNode');
-        }
-        
-        if (btn && btn.hasAttribute('data-command'))
-        {
-          this.execToolbarCommand(btn.getAttribute('data-command'));
-          evt.preventDefault();
-        }
-      }
+      if (parent == this.contents) return;
+    }
+    
+    // not in this editor
+    this.prevented = true;
+  },
+
+  // Records the current range (before button click).
+  storeCurrentRange: function(event) {
+    this.currentRange = window.getSelection().getRangeAt(0);
+  },
+
+  // Applies the stored range (after button click).
+  popCurrentRange: function()
+  {
+    if (this.currentRange)
+    {
+      this.contents.focus();
+      this.setRange(this.currentRange);
+      this.currentRange = null;
     }
   },
 
-  execToolbarCommand: function(command)
-  {
-    switch(command)
-    {
-      case 'createLink':    this.createLink();          break;
-      case 'insertImage':   this.insertImage();         break;
-      case 'ul': case 'ol': this.insertList(command);   break;
-      default:              this.execCommand(command);  break;
-    }
-  },
+  setBold:   function() { if (!this.prevented) this.execCommand('bold'); },
+  setItalic: function() { if (!this.prevented) this.execCommand('italic'); },
 
   execCommand: function(command, showDefaultUI, valueArgument)
   {
@@ -203,12 +205,14 @@ WYME.prototype =
 //    this.updateTextarea();
 //  },
 
-  createLink: function()
+  insertLink: function()
   {
-    var range = window.getSelection().getRangeAt(0);
-    var dialog = new UI.Dialog();
-    dialog.initDialog({id: "wyme-create-link"});
+    if (this.prevented) return;
     
+    var range = window.getSelection().getRangeAt(0);
+    
+    var dialog = new UI.Dialog();
+    dialog.initDialog({className: "wyme-insert-link"});
     dialog.setTitle("Insert Link");
     dialog.setContent('<form action="#">\
       <p>\
@@ -225,9 +229,9 @@ WYME.prototype =
     </form>');
     
     var form = dialog.getContent().getElementsByTagName('form').item(0);
-    form.addEventListener('submit', function(evt)
+    form.addEventListener('submit', function(event)
     {
-      evt.preventDefault();
+      event.preventDefault();
       
       var url = form.querySelectorAll('input[name=url]').item(0).value.trim();
       if (url != '')
@@ -250,6 +254,8 @@ WYME.prototype =
         link.appendChild(fragment);
         range.insertNode(link);
         this.updateTextarea();
+        
+        this.setRange(range);
       }
       
       dialog.hide();
@@ -261,9 +267,12 @@ WYME.prototype =
 
   insertImage: function()
   {
-    var range = document.getSelection().getRangeAt(0);
-    var dialog = new UI.Dialog({id: "wyme-create-link"});
+    if (this.prevented) return;
     
+    var range = window.getSelection().getRangeAt(0);
+    
+    var dialog = new UI.Dialog();
+    dialog.initDialog({className: "wyme-insert-image"});
     dialog.setTitle("Insert Image");
     dialog.setContent('<form action="#">\
       <p>\
@@ -300,12 +309,14 @@ WYME.prototype =
         
         range.insertNode(img);
         this.updateTextarea();
+        
+        this.setRange(range);
       }
       
       dialog.hide();
     }.bind(this), false);
     
-    dialog.display();
+    dialog.show();
     form.querySelectorAll('input[name=url]').item(0).focus();
   }
 //  ,

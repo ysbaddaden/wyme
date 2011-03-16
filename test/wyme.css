@@ -2,12 +2,12 @@
   padding: 5px; background: #f7f6f6; border: solid #b8b4b0;
   border-width: 1px 1px 0; border-radius: 6px 6px 0 0;
 }
-.toolbar span {
-  display: inline-block; min-width: 18px; padding: 4px; border: 1px solid transparent;
+.toolbar .button {
+  display: inline-block; min-width: 18px; padding: 2px; border: 1px solid transparent;
   -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px;
-  text-align: center; cursor: default; line-height: 1.0;
+  text-align: center; cursor: default; line-height: 1.0; min-height: 16px;
 }
-.toolbar span:hover {
+.toolbar .button:hover {
   border-color: #bab6b3; border-top-color: #c4c1be; border-left-color: #c4c1be;
   background: #fdfdfd;
   background: -moz-linear-gradient(top, #FDFDFD 0%, #F1F0EF 100%);
@@ -16,9 +16,18 @@
   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#FDFDFD', endColorstr='#F1F0EF',GradientType=0)";
   filter:      progid:DXImageTransform.Microsoft.gradient(startColorstr='#FDFDFD', endColorstr='#F1F0EF',GradientType=0);
 }
-.toolbar .switcher { float: right; padding: 2px; font-size: 13px; }
 
-.contents { padding: 5px;
+.toolbar .text { display: none; }
+.toolbar .icon { display: inline-block; width: 16px; height: 16px; vertical-align: text-bottom; }
+.toolbar .bold   .icon { background: url(icons/text_bold.png); }
+.toolbar .italic .icon { background: url(icons/text_italic.png); }
+.toolbar .link   .icon { background: url(icons/link.png); }
+.toolbar .image  .icon { background: url(icons/image.png); }
+
+.toolbar .toggle .text { display: inline; color: #4c4c4c; font-size: 13px; }
+.toolbar .toggle .icon { width: 0px; }
+
+.contents { padding: 5px; background: #FFF;
   border: 1px solid #b0aca8; border-top-color: #b8b4b0; border-left-color: #b8b4b0;
 }
 .contents p { margin: 0 0 1em; }
