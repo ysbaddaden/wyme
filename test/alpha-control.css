@@ -1,0 +1,27 @@
+body { font: normal normal 14px/1.5 sans-serif; }
+form { width: 400px; margin: 2em; display: inline-block; vertical-align: top; }
+
+label { font-weight: bold; color: #666; }
+input, textarea {
+  width: 100%; padding: 4px; font-family: monospace; font-size: inherit;
+  -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+  border: 1px solid #ada9a5;
+}
+input[type=submit] { width: inherit; }
+textarea { height: 80px; }
+
+.dialog { background: #f2f1f0; color: #3c3c3c; border: 1px solid #888;
+  border-radius: 5px 5px 0 0;
+  -webkit-box-shadow: 0 0 20px #888; -moz-box-shadow: 0 0 20px #888; box-shadow: 0 0 20px #888;
+}
+.dialog .titlebar { padding: 4px 10px; font-weight: bold; font-size: 13px;
+  text-align: right; border-bottom: 1px solid #CCC; }
+.dialog .titlebar .title { float: left; }
+.dialog .titlebar .close { font-size: 11px; color: #AAA; }
+.dialog .titlebar .close:hover { color: #C00; cursor: default; }
+.dialog .content { padding: 10px; background: #FFF; }
+
+.dialog form { margin: 0; }
+.dialog p:first-child { margin-top: 0; }
+.dialog p:last-child { margin-bottom: 0; }
+

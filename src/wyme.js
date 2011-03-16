@@ -36,7 +36,6 @@ WYME.prototype =
     else {
       this.contents.innerHTML = '<p><br/></p>';
     }
-    
     this.editor.appendChild(this.contents);
   },
 
@@ -45,15 +44,23 @@ WYME.prototype =
     this.toolbar = document.createElement('div');
     this.toolbar.className = 'toolbar';
     
-    var select = document.createElement('select');
-    select.innerHTML = "<option>HTML</option><option>Source</option>";
-    select.addEventListener('change', this.changeEditorFormat.bind(this), false);
-    this.toolbar.appendChild(select);
+    var switcher = document.createElement('a');
+    switcher.className = 'switcher';
+    switcher.href = '#';
+    switcher.addEventListener('click', this.changeEditorFormat.bind(this), false);
+    switcher.setAttribute('data-value', 'source');
+    switcher.innerText = 'source';
+    this.toolbar.appendChild(switcher);
     
-    this.buildToolbarButton('<b>bold</b>', 'bold');
+//    var select = document.createElement('select');
+//    select.innerHTML = "<option>HTML</option><option>Source</option>";
+//    select.addEventListener('change', this.changeEditorFormat.bind(this), false);
+//    this.toolbar.appendChild(select);
+    
+    this.buildToolbarButton('<b>bold</b>',   'bold');
     this.buildToolbarButton('<i>italic</i>', 'italic');
-    this.buildToolbarButton('link', 'createLink');
-    this.buildToolbarButton('image', 'insertImage');
+    this.buildToolbarButton('link',          'createLink');
+    this.buildToolbarButton('image',         'insertImage');
     
     this.editor.appendChild(this.toolbar);
   },
@@ -71,14 +78,20 @@ WYME.prototype =
 
   changeEditorFormat: function(evt)
   {
-    switch(evt.target.value)
+    evt.preventDefault();
+    
+    switch (evt.target.getAttribute('data-value'))
     {
-      case 'Source':
+      case 'source':
+        evt.target.innerText = 'HTML';
+        evt.target.setAttribute('data-value', 'HTML');
         this.textarea.style.display = 'block';
         this.contents.style.display = 'none';
       break;
       
       case 'HTML':
+        evt.target.innerText = 'source';
+        evt.target.setAttribute('data-value', 'source');
         this.textarea.style.display = 'none';
         this.contents.style.display = 'block';
       break;
@@ -193,7 +206,8 @@ WYME.prototype =
   createLink: function()
   {
     var range = window.getSelection().getRangeAt(0);
-    var dialog = new UI.Dialog({id: "wyme-create-link"});
+    var dialog = new UI.Dialog();
+    dialog.initDialog({id: "wyme-create-link"});
     
     dialog.setTitle("Insert Link");
     dialog.setContent('<form action="#">\
@@ -241,7 +255,7 @@ WYME.prototype =
       dialog.hide();
     }.bind(this), false);
     
-    dialog.display();
+    dialog.show();
     form.querySelectorAll('input[name=url]').item(0).focus();
   },
 
@@ -306,8 +320,3 @@ WYME.prototype =
 //    }
 //  }
 }
-
-Array.prototype.forEach.call(document.querySelectorAll('textarea.wyme'), function(textarea) {
-  new WYME(textarea);
-});
-

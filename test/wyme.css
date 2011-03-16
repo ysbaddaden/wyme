@@ -1,0 +1,26 @@
+.toolbar {
+  padding: 5px; background: #f7f6f6; border: solid #b8b4b0;
+  border-width: 1px 1px 0; border-radius: 6px 6px 0 0;
+}
+.toolbar span {
+  display: inline-block; min-width: 18px; padding: 4px; border: 1px solid transparent;
+  -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px;
+  text-align: center; cursor: default; line-height: 1.0;
+}
+.toolbar span:hover {
+  border-color: #bab6b3; border-top-color: #c4c1be; border-left-color: #c4c1be;
+  background: #fdfdfd;
+  background: -moz-linear-gradient(top, #FDFDFD 0%, #F1F0EF 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #FDFDFD), color-stop(100%, #F1F0EF));
+  background: linear-gradient(top, #FDFDFD 0%, #F1F0EF 100%);
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#FDFDFD', endColorstr='#F1F0EF',GradientType=0)";
+  filter:      progid:DXImageTransform.Microsoft.gradient(startColorstr='#FDFDFD', endColorstr='#F1F0EF',GradientType=0);
+}
+.toolbar .switcher { float: right; padding: 2px; font-size: 13px; }
+
+.contents { padding: 5px;
+  border: 1px solid #b0aca8; border-top-color: #b8b4b0; border-left-color: #b8b4b0;
+}
+.contents p { margin: 0 0 1em; }
+.contents p:last-child { margin-bottom: 0; }
+
