@@ -35,7 +35,7 @@ UI.Button.prototype.setText = function(text) {
 UI.Button.prototype.setActive = function(active)
 {
   var method = (this.active = !!active) ? 'add' : 'remove';
-  this[method + 'ClassName']('active');
+  this.content[method + 'ClassName']('active');
 }
 
 UI.Button.prototype.getActive = function(active) {

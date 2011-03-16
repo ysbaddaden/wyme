@@ -15,15 +15,22 @@ WYME.prototype =
     
     this.buildToolbar();
     this.buildContents();
+    this.moveTextarea();
+  },
+
+  buildToolbar: function()
+  {
+    this.toolbar = new UI.Toolbar();
+    this.toolbar.initToolbar();
+    this.toolbar.addEventListener('before', this.checkSelection.bind(this));
     
-    this.textarea.style.display = 'none';
-    this.textarea.parentNode.insertAfter(this.editor, this.textarea);
-    this.editor.appendChild(this.textarea);
+    this.toolbar.addButton('bold',   'Bold',   this.setBold.bind(this));
+    this.toolbar.addButton('italic', 'Italic', this.setItalic.bind(this));
+    this.toolbar.addButton('link',   'Link',   this.insertLink.bind(this));
+    this.toolbar.addButton('image',  'Image',  this.insertImage.bind(this));
+    this.toolbar.addButton('toggle', 'Source', this.toggleEditor.bind(this));
     
-    this.textarea.addEventListener('keyup',   this.updateContents.bind(this), false);
-    
-    this.contents.addEventListener('keydown', this.onkeydown.bind(this), false);
-    this.contents.addEventListener('keyup',   this.onkeyup.bind(this), false);
+    this.editor.appendChild(this.toolbar.getContent());
   },
 
   buildContents: function()
@@ -38,24 +45,19 @@ WYME.prototype =
     else {
       this.contents.innerHTML = '<p><br/></p>';
     }
+    
+    this.contents.addEventListener('keydown', this.onkeydown.bind(this), false);
+    this.contents.addEventListener('keyup',   this.onkeyup.bind(this), false);
+    
     this.editor.appendChild(this.contents);
   },
 
-  buildToolbar: function()
+  moveTextarea: function()
   {
-    this.toolbar = new UI.Toolbar();
-    this.toolbar.initToolbar();
-    
-    this.toolbar.addButton('bold',   'Bold',   this.setBold.bind(this));
-    this.toolbar.addButton('italic', 'Italic', this.setItalic.bind(this));
-    this.toolbar.addButton('link',   'Link',   this.insertLink.bind(this));
-    this.toolbar.addButton('image',  'Image',  this.insertImage.bind(this));
-    this.toolbar.addButton('toggle', 'source »', this.toggleEditor.bind(this));
-    
-    this.toolbar.addEventListener('before', this.checkSelection.bind(this));
-//    this.toolbar.addEventListener('after',  this.popCurrentRange.bind(this));
-    
-    this.editor.appendChild(this.toolbar.getContent());
+    this.textarea.style.display = 'none';
+    this.textarea.parentNode.insertAfter(this.editor, this.textarea);
+    this.textarea.addEventListener('keyup', this.updateContents.bind(this), false);
+    this.editor.appendChild(this.textarea);
   },
 
   // helpers
@@ -64,14 +66,14 @@ WYME.prototype =
   {
     if (this.currentEditorType == 'html')
     {
-      button.setText('« html');
+      button.setActive(true);
       this.currentEditorType = 'source';
       this.textarea.style.display = 'block';
       this.contents.style.display = 'none';
     }
     else
     {
-      button.setText('source »');
+      button.setActive(false);
       this.currentEditorType = 'html';
       this.textarea.style.display = 'none';
       this.contents.style.display = 'block';
