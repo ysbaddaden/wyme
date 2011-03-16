@@ -50,7 +50,7 @@ WYME.prototype =
     this.toolbar.addButton('italic', 'Italic', this.setItalic.bind(this));
     this.toolbar.addButton('link',   'Link',   this.insertLink.bind(this));
     this.toolbar.addButton('image',  'Image',  this.insertImage.bind(this));
-    this.toolbar.addButton('toggle', 'source', this.toggleEditor.bind(this));
+    this.toolbar.addButton('toggle', 'source »', this.toggleEditor.bind(this));
     
     this.toolbar.addEventListener('before', this.checkSelection.bind(this));
 //    this.toolbar.addEventListener('after',  this.popCurrentRange.bind(this));
@@ -64,14 +64,14 @@ WYME.prototype =
   {
     if (this.currentEditorType == 'html')
     {
-      button.setText('html');
+      button.setText('« html');
       this.currentEditorType = 'source';
       this.textarea.style.display = 'block';
       this.contents.style.display = 'none';
     }
     else
     {
-      button.setText('source');
+      button.setText('source »');
       this.currentEditorType = 'html';
       this.textarea.style.display = 'none';
       this.contents.style.display = 'block';
