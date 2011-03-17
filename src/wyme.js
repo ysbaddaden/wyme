@@ -8,7 +8,7 @@ WYME.prototype =
 {
   buildEditor: function()
   {
-    this.currentEditorType = 'html';
+    this.currentEditor = 'html';
     
     this.editor = document.createElement('div');
     this.editor.className = 'wyme';
@@ -22,13 +22,14 @@ WYME.prototype =
   {
     this.toolbar = new UI.Toolbar();
     this.toolbar.initToolbar();
-    this.toolbar.addEventListener('before', this.checkSelection.bind(this));
     
-    this.toolbar.addButton('bold',   'Bold',   this.setBold.bind(this));
-    this.toolbar.addButton('italic', 'Italic', this.setItalic.bind(this));
-    this.toolbar.addButton('link',   'Link',   this.insertLink.bind(this));
-    this.toolbar.addButton('image',  'Image',  this.insertImage.bind(this));
-    this.toolbar.addButton('toggle', 'Source', this.toggleEditor.bind(this));
+    this.toolbar.addButton('bold',          'Bold',          this.setBold.bind(this));
+    this.toolbar.addButton('italic',        'Italic',        this.setItalic.bind(this));
+    this.toolbar.addButton('underline',     'Underline',     this.setUnderline.bind(this));
+    this.toolbar.addButton('strikethrough', 'Strikethrough', this.setStrikethrough.bind(this));
+    this.toolbar.addButton('link',          'Link',          this.insertLink.bind(this));
+    this.toolbar.addButton('image',         'Image',         this.insertImage.bind(this));
+    this.toolbar.addButton('toggle',        'Source',        this.toggleEditor.bind(this));
     
     this.editor.appendChild(this.toolbar.getContent());
   },
@@ -64,17 +65,17 @@ WYME.prototype =
 
   toggleEditor: function(button)
   {
-    if (this.currentEditorType == 'html')
+    if (this.currentEditor == 'html')
     {
       button.setActive(true);
-      this.currentEditorType = 'source';
+      this.currentEditor = 'source';
       this.textarea.style.display = 'block';
       this.contents.style.display = 'none';
     }
     else
     {
       button.setActive(false);
-      this.currentEditorType = 'html';
+      this.currentEditor = 'html';
       this.textarea.style.display = 'none';
       this.contents.style.display = 'block';
     }
@@ -105,6 +106,7 @@ WYME.prototype =
   },
 
   // Applies any given range.
+  // FIXME: doesn't work as expected in IE < 9 (ierange bug?)
   setRange: function(range)
   {
     var selection = window.getSelection();
@@ -120,6 +122,22 @@ WYME.prototype =
     // ...
     // ...
   },
+
+//  // Records the current range (before button click).
+//  storeCurrentRange: function(event) {
+//    this.currentRange = window.getSelection().getRangeAt(0);
+//  },
+
+//  // Applies the stored range (after button click).
+//  popCurrentRange: function()
+//  {
+//    if (this.currentRange)
+//    {
+//      this.contents.focus();
+//      this.setRange(this.currentRange);
+//      this.currentRange = null;
+//    }
+//  },
 
   // content editable events
 
@@ -146,92 +164,62 @@ WYME.prototype =
 
   // toolbar events
 
+  setBold:          function() { this.setStyle('bold'); },
+  setItalic:        function() { this.setStyle('italic'); },
+  setUnderline:     function() { this.setStyle('underline'); },
+  setStrikethrough: function() { this.setStyle('strikethrough'); },
+
   checkSelection: function(event)
   {
-    this.prevented = false;
-    
     // limited to the HTML editor right now
-    if (this.currentEditorType == 'source')
-    {
-      this.prevented = true;
-      return;
+    if (this.currentEditor == 'source') {
+      return false;
     }
     
     // no selection = failure
     try {
       var range = window.getSelection().getRangeAt(0);
     }
-    catch (e)
-    {
-      this.prevented = true;
-      return;
+    catch (e) {
+      return false;
     }
     
     // checks if selection is within this editor
-    var parent = window.getSelection().anchorNode || range.startContainer.parentNode;
-    while (parent && parent.parentNode)
+    if (range)
     {
-      parent = parent.parentNode;
-      if (parent == this.contents) return;
+      var elm = range.startContainer;
+      while (elm && elm.parentNode)
+      {
+        elm = elm.parentNode;
+        if (elm == this.contents) return true;
+      }
     }
     
     // not in this editor
-    this.prevented = true;
+    return false;
   },
 
-  // Records the current range (before button click).
-  storeCurrentRange: function(event) {
-    this.currentRange = window.getSelection().getRangeAt(0);
-  },
-
-  // Applies the stored range (after button click).
-  popCurrentRange: function()
+  setStyle: function(command, showDefaultUI, valueArgument)
   {
-    if (this.currentRange)
+    if (this.checkSelection())
     {
-      this.contents.focus();
-      this.setRange(this.currentRange);
-      this.currentRange = null;
+      document.execCommand(command, showDefaultUI, valueArgument);
+      this.updateTextarea();
     }
   },
 
-  setBold:   function() { if (!this.prevented) this.execCommand('bold'); },
-  setItalic: function() { if (!this.prevented) this.execCommand('italic'); },
-
-  execCommand: function(command, showDefaultUI, valueArgument)
-  {
-    document.execCommand(command, showDefaultUI, valueArgument);
-    this.updateTextarea();
-  },
-
-//  insertList: function(type)
-//  {
-//    var sel = window.getSelection();
-//    var ul = document.createElement(type);
-//    var li = document.createElement('li');
-//    li.appendChild(document.createElement('br'));
-//    ul.appendChild(li);
-//    
-//    var parent = sel.anchorNode.parentNode;
-//    parent.insertAfter(ul, sel.anchorNode);
-//    
-//    if (sel.getRangeAt(0).isCollapsed) {
-//      parent.removeChild(sel.anchorNode);
-//    }
-//    
-//    this.updateTextarea();
-//  },
-
   insertLink: function()
   {
-    if (this.prevented) return;
+    if (!this.checkSelection()) return;
     
     var range = window.getSelection().getRangeAt(0);
     
     var dialog = new UI.Dialog();
     dialog.initDialog({className: "wyme-insert-link"});
     dialog.setTitle("Insert Link");
-    dialog.setContent('<form action="#">\
+    
+    var form = document.createElement('form');
+    form.innerHTML = '\
       <p>\
         <label for="wyme-link-url">URL</label>\
         <input type="text" name="url" id="wyme-link-url" placeholder="http://"/>\
@@ -242,21 +230,20 @@ WYME.prototype =
       </p>\
       <p class="actions">\
         <input type="submit" value="OK"/>\
-      </p>\
-    </form>');
+      </p>';
+    dialog.setContent(form);
     
-    var form = dialog.getContent().getElementsByTagName('form').item(0);
     form.addEventListener('submit', function(event)
     {
       event.preventDefault();
       
-      var url = form.querySelectorAll('input[name=url]').item(0).value.trim();
+      var url = form.querySelectorAll('input[name=url]')[0].value.trim();
       if (url != '')
       {
         var link = document.createElement('a');
         link.href = url;
         
-        var title = form.querySelectorAll('input[name=title]').item(0).value.trim();
+        var title = form.querySelectorAll('input[name=title]')[0].value.trim();
         if (title) link.setAttribute('title', title);
         
         var fragment = null;
@@ -279,19 +266,22 @@ WYME.prototype =
     }.bind(this), false);
     
     dialog.show();
-    form.querySelectorAll('input[name=url]').item(0).focus();
+    console.log(form.querySelectorAll);
+    form.querySelectorAll('input[name=url]')[0].focus();
   },
 
   insertImage: function()
   {
-    if (this.prevented) return;
+    if (!this.checkSelection()) return;
     
     var range = window.getSelection().getRangeAt(0);
     
     var dialog = new UI.Dialog();
     dialog.initDialog({className: "wyme-insert-image"});
     dialog.setTitle("Insert Image");
-    dialog.setContent('<form action="#">\
+    
+    var form = document.createElement('form');
+    form.innerHTML = '\
       <p>\
         <label for="wyme-link-url">URL</label>\
         <input type="text" name="url" id="wyme-link-url"/>\
@@ -306,22 +296,21 @@ WYME.prototype =
       </p>\
       <p>\
         <input type="submit" value="OK"/>\
-      </p>\
-    </form>');
+      </p>';
+    dialog.setContent(form);
     
-    var form = dialog.getContent().getElementsByTagName('form').item(0);
     form.addEventListener('submit', function(evt)
     {
       evt.preventDefault();
       
-      var url = form.querySelectorAll('input[name=url]').item(0).value.trim();
+      var url = form.querySelectorAll('input[name=url]')[0].value.trim();
       if (url != '')
       {
         var img = document.createElement('img');
         img.src = url;
-        img.setAttribute('alt', form.querySelectorAll('input[name=alt]').item(0).value.trim());
+        img.setAttribute('alt', form.querySelectorAll('input[name=alt]')[0].value.trim());
         
-        var title = form.querySelectorAll('input[name=title]').item(0).value.trim();
+        var title = form.querySelectorAll('input[name=title]')[0].value.trim();
         if (title) img.setAttribute('title', title);
         
         range.insertNode(img);
@@ -334,17 +323,6 @@ WYME.prototype =
     }.bind(this), false);
     
     dialog.show();
-    form.querySelectorAll('input[name=url]').item(0).focus();
+    form.querySelectorAll('input[name=url]')[0].focus();
   }
-//  ,
-
-//  insertHTML: function(html)
-//  {
-//    if (document.selection) {
-//      document.selection.createRange().pasteHtML(html);
-//    }
-//    else {
-//      document.execCommand('insertHTML', false, html);
-//    }
-//  }
 }

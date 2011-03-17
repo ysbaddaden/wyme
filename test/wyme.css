@@ -29,10 +29,12 @@
 
 .wyme > .toolbar .text { display: none; }
 .wyme > .toolbar .icon { display: inline-block; width: 16px; height: 16px; vertical-align: text-bottom; }
-.wyme > .toolbar .bold   .icon { background: url(icons/text_bold.png); }
-.wyme > .toolbar .italic .icon { background: url(icons/text_italic.png); }
-.wyme > .toolbar .link   .icon { background: url(icons/link.png); }
-.wyme > .toolbar .image  .icon { background: url(icons/image.png); }
+.wyme > .toolbar .bold          .icon { background: url(icons/text_bold.png); }
+.wyme > .toolbar .italic        .icon { background: url(icons/text_italic.png); }
+.wyme > .toolbar .underline     .icon { background: url(icons/text_underline.png); }
+.wyme > .toolbar .strikethrough .icon { background: url(icons/text_strikethrough.png); }
+.wyme > .toolbar .link          .icon { background: url(icons/link.png); }
+.wyme > .toolbar .image         .icon { background: url(icons/image.png); }
 
 .wyme > .toolbar .toggle { float: right; min-width: 55px; }
 .wyme > .toolbar .toggle .text { display: inline; color: #4c4c4c; font-size: 13px; }

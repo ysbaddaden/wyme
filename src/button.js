@@ -1,19 +1,19 @@
 UI.Button = function() {}
 UI.Button.prototype = new UI.Widget();
 
-UI.Button.prototype.initButton = function(type, callback)
+UI.Button.prototype.initButton = function(name, callback)
 {
-  if (typeof type     == 'undefined') throw new Error("Missing required 'type' argument.");
+  if (typeof name     == 'undefined') throw new Error("Missing required 'name' argument.");
   if (typeof callback == 'undefined') throw new Error("Missing required 'callback' argument.");
   
   this.active   = false;
-  this.type     = type;
+  this.name     = name;
   this.callback = callback;
   
   this.initWidget();
   
-  this.content.className = 'button ' + type;
-  this.content.addEventListener('click', this.dispatch.bind(this), false);
+  this.content.className = 'button ' + name;
+  this.content.addEventListener('mousedown', this._dispatch.bind(this), false);
   
   this.icon = document.createElement('span');
   this.icon.className = 'icon';
@@ -22,10 +22,6 @@ UI.Button.prototype.initButton = function(type, callback)
   this.text = document.createElement('span');
   this.text.className = 'text';
   this.content.appendChild(this.text);
-}
-
-UI.Button.prototype.dispatch = function(event) {
-  this.callback(this);
 }
 
 UI.Button.prototype.setText = function(text) {
@@ -38,7 +34,14 @@ UI.Button.prototype.setActive = function(active)
   this.content[method + 'ClassName']('active');
 }
 
-UI.Button.prototype.getActive = function(active) {
-  return this.active;
+UI.Button.prototype.setDisabled = function(disabled)
+{
+  var method = (this.disabled = !!disabled) ? 'add' : 'remove';
+  this.content[method + 'ClassName']('disabled');
+}
+
+// :nodoc:
+UI.Button.prototype._dispatch = function(event) {
+  this.callback(this);
 }
 

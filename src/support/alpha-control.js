@@ -725,7 +725,7 @@ Eventable.Event.prototype = {
   },
 
   stopPropagation: function() {
-    this.propagationpropagationStopped = true;
+    this.propagationStopped = true;
   }
 }
 
@@ -1422,8 +1422,7 @@ UI.Dialog.prototype.setPosition = function()
   }
   else
   {
-    var top = ((window.innerHeight || document.documentElement.clientHeight) - this.container.offsetHeight) / 2;
-    top += document.documentElement.scrollTop || window.pageYOffset;
+    var top = (window.innerHeight - this.container.offsetHeight) / 2 + window.pageYOffset;
     this.container.style.top = Math.round(top) + 'px';
   }
   
@@ -1435,8 +1434,7 @@ UI.Dialog.prototype.setPosition = function()
   }
   else
   {
-    var left = ((window.innerWidth || document.documentElement.clientWidth) - this.container.offsetWidth) / 2;
-    left += document.documentElement.scrollLeft || window.pageXOffset;
+    var left = (window.innerWidth - this.container.offsetWidth) / 2 + window.pageXOffset;
     this.container.style.left = Math.round(left) + 'px';
   }
   
@@ -1745,7 +1743,7 @@ UI.ListPicker.prototype.selectSelection = function()
   if (this.selection)
   {
     var event = this.createEvent('select');
-    event.target = this.selection;
+    event.targetElement = this.selection;
     this.dispatchEvent(event);
     this.unmarkSelection();
   }
@@ -1943,7 +1941,7 @@ UI.Autocomplete.prototype.setItems = function(items)
 // Called whenever a selection is selected. Tries to read a data-value
 // attribute and falls back to innerText.
 UI.Autocomplete.prototype.autocomplete = function(event) {
-  this.setValue(event.target.getAttribute('data-value') || event.target.innerText);
+  this.setValue(event.targetElement.getAttribute('data-value') || event.targetElement.innerText);
 }
 
 // Sets the autocompleted input value and empties the the list picker.

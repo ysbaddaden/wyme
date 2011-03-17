@@ -1,0 +1,48 @@
+Button
+  - active
+  - name
+  - text
+  - icon
+  
+  + initButton(name, callback)
+    initWidget()
+    content.addEventListener('mousedown', callback(this))
+  
+  + setText(text)
+  + setActive(active)
+
+Toolbar
+  + initToolbar(options)
+  + addButton(text, name, callback)
+  + getButton(name)
+
+Wyme
+  - toolbar
+  - editor
+  - contents
+  - textarea
+  - currentEditor
+  
+  + initWyme()
+    initWidget()
+    createToolbar()
+    createEditor()
+  
+  + createToolbar()
+    toolbar = new Toolbar()
+    toolbar.initToolbar(options)
+    
+    toolbar.addButton('Bold',      'bold',      setBold)
+    toolbar.addButton('italic',    'italic',    setItalic)
+    toolbar.addButton('Underline', 'underline', setUnderline)
+    toolbar.addButton('Strike',    'del',       setStrike)
+    toolbar.addButton('Link',      'link',      insertLink)
+    toolbar.addButton('Image',     'image',     insertImage)
+    toolbar.addButton('Source',    'toggle',    toggleEditor)
+  
+  + createEditor()
+    contents = createElement('div')
+    ...
+  
+  + ...
+
