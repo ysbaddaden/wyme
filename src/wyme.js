@@ -112,14 +112,15 @@ WYME.prototype =
   // Activates or deactivates toolbar buttons depending on the caret position.
   updateToolbarState: function()
   {
+    var range, element, buttons, name;
     try {
-      var range = window.getSelection().getRangeAt(0);
+      range = window.getSelection().getRangeAt(0);
     }
     catch (e) {
       return;
     }
-    var element = range.endContainer;
-    var buttons = {
+    element = range.endContainer;
+    buttons = {
       'bold':          false,
       'italic':        false,
       'underline':     false,
@@ -135,7 +136,7 @@ WYME.prototype =
       if (element.nodeName == 'S') buttons['strikethrough'] = true;
     }
     
-    for (var name in buttons) {
+    for (name in buttons) {
       this.toolbar.getButton(name).setActive(buttons[name]);
     }
   },
@@ -143,13 +144,14 @@ WYME.prototype =
   // Activates or deactivates toolbar buttons depending on the caret position.
   resetToolbarState: function()
   {
-    var buttons = {
+    var buttons, name;
+    buttons = {
       'bold':          false,
       'italic':        false,
       'underline':     false,
       'strikethrough': false
     }
-    for (var name in buttons) {
+    for (name in buttons) {
       this.toolbar.getButton(name).setActive(false);
     }
   },
@@ -165,6 +167,8 @@ WYME.prototype =
 
   checkSelection: function(event)
   {
+    var range, elm;
+    
     // limited to the HTML editor right now
     if (this.currentEditor == 'source') {
       return false;
@@ -172,7 +176,7 @@ WYME.prototype =
     
     // no selection = failure
     try {
-      var range = window.getSelection().getRangeAt(0);
+      range = window.getSelection().getRangeAt(0);
     }
     catch (e) {
       return false;
@@ -181,7 +185,7 @@ WYME.prototype =
     // checks if selection is within this editor
     if (range)
     {
-      var elm = range.startContainer;
+      elm = range.startContainer;
       while (elm && elm.parentNode)
       {
         elm = elm.parentNode;
@@ -251,15 +255,16 @@ WYME.prototype =
   // FIXME: closing the insertLink dialog should reapply the range selection.
   insertLink: function()
   {
+    var range, dialog, form;
     if (!this.checkSelection()) return;
     
-    var range = window.getSelection().getRangeAt(0);
+    range = window.getSelection().getRangeAt(0);
     
-    var dialog = new UI.Dialog();
+    dialog = new UI.Dialog();
     dialog.initDialog({className: "wyme-insert-link"});
     dialog.setTitle("Insert Link");
     
-    var form = document.createElement('form');
+    form = document.createElement('form');
     form.innerHTML = '\
       <p>\
         <label for="wyme-link-url">URL</label>\
@@ -276,18 +281,19 @@ WYME.prototype =
     
     form.addEventListener('submit', function(event)
     {
+      var url, link, title, fragment;
       event.preventDefault();
       
-      var url = form.querySelectorAll('input[name=url]')[0].value.trim();
+      url = form.querySelectorAll('input[name=url]')[0].value.trim();
       if (url != '')
       {
-        var link = document.createElement('a');
+        link = document.createElement('a');
         link.href = url;
         
-        var title = form.querySelectorAll('input[name=title]')[0].value.trim();
+        title = form.querySelectorAll('input[name=title]')[0].value.trim();
         if (title) link.setAttribute('title', title);
         
-        var fragment = null;
+        fragment = null;
         
         if (range.collapsed) {
           fragment = document.createTextNode(url.replace(/^http:\/\//, '').replace(/\/$/, ''));
@@ -314,15 +320,16 @@ WYME.prototype =
   // FIXME: closing the insertImage dialog should reapply the range selection.
   insertImage: function()
   {
+    var range, dialog, form;
     if (!this.checkSelection()) return;
     
-    var range = window.getSelection().getRangeAt(0);
+    range = window.getSelection().getRangeAt(0);
     
-    var dialog = new UI.Dialog();
+    dialog = new UI.Dialog();
     dialog.initDialog({className: "wyme-insert-image"});
     dialog.setTitle("Insert Image");
     
-    var form = document.createElement('form');
+    form = document.createElement('form');
     form.innerHTML = '\
       <p>\
         <label for="wyme-link-url">URL</label>\
@@ -343,16 +350,17 @@ WYME.prototype =
     
     form.addEventListener('submit', function(evt)
     {
+      var url, img, title;
       evt.preventDefault();
       
-      var url = form.querySelectorAll('input[name=url]')[0].value.trim();
+      url = form.querySelectorAll('input[name=url]')[0].value.trim();
       if (url != '')
       {
-        var img = document.createElement('img');
+        img = document.createElement('img');
         img.src = url;
         img.setAttribute('alt', form.querySelectorAll('input[name=alt]')[0].value.trim());
         
-        var title = form.querySelectorAll('input[name=title]')[0].value.trim();
+        title = form.querySelectorAll('input[name=title]')[0].value.trim();
         if (title) img.setAttribute('title', title);
         
         range.insertNode(img);
