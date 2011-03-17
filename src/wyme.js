@@ -47,8 +47,12 @@ WYME.prototype =
       this.contents.innerHTML = '<p><br/></p>';
     }
     
+    this.contents.addEventListener('click',   this.updateToolbarState.bind(this), false);
+    this.contents.addEventListener('focus',   this.updateToolbarState.bind(this), false);
+    this.contents.addEventListener('blur',    this.resetToolbarState.bind(this),  false);
+    
     this.contents.addEventListener('keydown', this.onkeydown.bind(this), false);
-    this.contents.addEventListener('keyup',   this.onkeyup.bind(this), false);
+    this.contents.addEventListener('keyup',   this.onkeyup.bind(this),   false);
     
     this.editor.appendChild(this.contents);
   },
@@ -105,6 +109,51 @@ WYME.prototype =
     }.bind(this), 200);
   },
 
+  // Activates or deactivates toolbar buttons depending on the caret position.
+  updateToolbarState: function()
+  {
+    try {
+      var range = window.getSelection().getRangeAt(0);
+    }
+    catch (e) {
+      return;
+    }
+    var element = range.endContainer;
+    var buttons = {
+      'bold':          false,
+      'italic':        false,
+      'underline':     false,
+      'strikethrough': false
+    }
+    
+    while (element && element.parentNode)
+    {
+      element = element.parentNode;
+      if (element.nodeName == 'B') buttons['bold']          = true;
+      if (element.nodeName == 'I') buttons['italic']        = true;
+      if (element.nodeName == 'U') buttons['underline']     = true;
+      if (element.nodeName == 'S') buttons['strikethrough'] = true;
+    }
+    
+    for (var name in buttons) {
+      this.toolbar.getButton(name).setActive(buttons[name]);
+    }
+  },
+
+  // Activates or deactivates toolbar buttons depending on the caret position.
+  resetToolbarState: function()
+  {
+    var buttons = {
+      'bold':          false,
+      'italic':        false,
+      'underline':     false,
+      'strikethrough': false
+    }
+    for (var name in buttons) {
+      this.toolbar.getButton(name).setActive(false);
+    }
+  },
+
   // Applies any given range.
   // FIXME: doesn't work as expected in IE < 9 (ierange bug?)
   setRange: function(range)
@@ -114,13 +163,34 @@ WYME.prototype =
     selection.addRange(range);
   },
 
-  updateToolbarState: function()
+  checkSelection: function(event)
   {
-    var selection = window.getSelection();
+    // limited to the HTML editor right now
+    if (this.currentEditor == 'source') {
+      return false;
+    }
     
-    // TODO: Wyme.prototype.updateToolbarState
-    // ...
-    // ...
+    // no selection = failure
+    try {
+      var range = window.getSelection().getRangeAt(0);
+    }
+    catch (e) {
+      return false;
+    }
+    
+    // checks if selection is within this editor
+    if (range)
+    {
+      var elm = range.startContainer;
+      while (elm && elm.parentNode)
+      {
+        elm = elm.parentNode;
+        if (elm == this.contents) return true;
+      }
+    }
+    
+    // not in this editor
+    return false;
   },
 
 //  // Records the current range (before button click).
@@ -169,36 +239,6 @@ WYME.prototype =
   setUnderline:     function() { this.setStyle('underline'); },
   setStrikethrough: function() { this.setStyle('strikethrough'); },
 
-  checkSelection: function(event)
-  {
-    // limited to the HTML editor right now
-    if (this.currentEditor == 'source') {
-      return false;
-    }
-    
-    // no selection = failure
-    try {
-      var range = window.getSelection().getRangeAt(0);
-    }
-    catch (e) {
-      return false;
-    }
-    
-    // checks if selection is within this editor
-    if (range)
-    {
-      var elm = range.startContainer;
-      while (elm && elm.parentNode)
-      {
-        elm = elm.parentNode;
-        if (elm == this.contents) return true;
-      }
-    }
-    
-    // not in this editor
-    return false;
-  },
-
   setStyle: function(command, showDefaultUI, valueArgument)
   {
     if (this.checkSelection())
@@ -208,6 +248,7 @@ WYME.prototype =
     }
   },
 
+  // FIXME: closing the insertLink dialog should reapply the range selection.
   insertLink: function()
   {
     if (!this.checkSelection()) return;
@@ -270,6 +311,7 @@ WYME.prototype =
     form.querySelectorAll('input[name=url]')[0].focus();
   },
 
+  // FIXME: closing the insertImage dialog should reapply the range selection.
   insertImage: function()
   {
     if (!this.checkSelection()) return;

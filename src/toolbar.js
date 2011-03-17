@@ -10,14 +10,22 @@ UI.Toolbar.prototype.initToolbar = function()
 
 UI.Toolbar.prototype.addButton = function(name, text, callback)
 {
+  if (this.buttons[name]) {
+    throw new Error("Toolbar already has a button named '" + name + "'.");
+  }
+  
   var button = new UI.Button();
   button.initButton(name, callback);
   button.setText(text);
   button._show();
   
-  this.buttons.push(button);
+  this.buttons[name] = button;
   this.content.appendChild(button.getContent());
   
   return button;
+}
+
+UI.Toolbar.prototype.getButton = function(name) {
+  return this.buttons[name];
 }
 
