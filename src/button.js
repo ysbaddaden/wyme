@@ -41,7 +41,9 @@ UI.Button.prototype.setDisabled = function(disabled)
 }
 
 // :nodoc:
-UI.Button.prototype._dispatch = function(event) {
+UI.Button.prototype._dispatch = function(event)
+{
   this.callback(this);
+  event.preventDefault();
 }
 
