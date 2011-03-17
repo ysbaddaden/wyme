@@ -112,6 +112,15 @@ WYME.prototype =
     selection.addRange(range);
   },
 
+  updateToolbarState: function()
+  {
+    var selection = window.getSelection();
+    
+    // TODO: Wyme.prototype.updateToolbarState
+    // ...
+    // ...
+  },
+
   // content editable events
 
   onkeydown: function(evt)
@@ -125,8 +134,14 @@ WYME.prototype =
     }
   },
 
-  onkeyup: function(evt) {
+  onkeyup: function(evt)
+  {
+    this.updateToolbarState();
     this.updateTextarea();
+  },
+
+  onfocus: function(evt) {
+    this.updateToolbar();
   },
 
   // toolbar events
@@ -144,7 +159,7 @@ WYME.prototype =
     
     // no selection = failure
     try {
-      window.getSelection().getRangeAt(0);
+      var range = window.getSelection().getRangeAt(0);
     }
     catch (e)
     {
@@ -153,7 +168,7 @@ WYME.prototype =
     }
     
     // checks if selection is within this editor
-    var parent = window.getSelection().anchorNode;
+    var parent = window.getSelection().anchorNode || range.startContainer.parentNode;
     while (parent && parent.parentNode)
     {
       parent = parent.parentNode;

@@ -1,15 +1,22 @@
-= WYME
+= Wyme
 
-WYME stands for What You Mean Editor. It's not supposed to be a WYSIWYG
-editor, thought it actually looks like one as it stands.
+Wyme stands for What You Mean Editor. It's not supposed to be a WYSIWYG
+editor, thought it looks like one for now.
 
-WYME is library agnostic, and should be working as is on modern browsers.
-For older browsers like Internet Explorer 8 and below, AlphaCore is
-required. See http://github.com/ysbaddaden/alpha-core
+Wyme requires the AlphaControl library and should be working in any modern
+browsers, thought it shall certainly fail in Internet Explorer 8 and below,
+until I --or someone-- fixes it.
+
+You may get AlphaCore and AlphaControl at:
+
+- http://github.com/ysbaddaden/alpha-core
+- http://github.com/ysbaddaden/alpha-control
+
+A copy is available in the src/support directory.
 
 == License
 
-Distributed under the MIT-License
+Wyme is distributed under the MIT-License.
 
 == Author
 
