@@ -6,7 +6,6 @@ UI.Button.prototype.initButton = function(name, callback)
   if (typeof name     == 'undefined') throw new Error("Missing required 'name' argument.");
   if (typeof callback == 'undefined') throw new Error("Missing required 'callback' argument.");
   
-  this.active   = false;
   this.name     = name;
   this.callback = callback;
   
@@ -28,12 +27,6 @@ UI.Button.prototype.setText = function(text) {
   this.text.innerText = text;
 }
 
-UI.Button.prototype.setActive = function(active)
-{
-  var method = (this.active = !!active) ? 'add' : 'remove';
-  this.content[method + 'ClassName']('active');
-}
-
 UI.Button.prototype.setDisabled = function(disabled)
 {
   var method = (this.disabled = !!disabled) ? 'add' : 'remove';
@@ -45,5 +38,20 @@ UI.Button.prototype._dispatch = function(event)
 {
   this.callback(this);
   event.preventDefault();
+}
+
+UI.ToggleButton = function() {}
+UI.ToggleButton.prototype = new UI.Button();
+
+UI.Button.prototype.initToggleButton = function(name, callback)
+{
+  this.initButton(name, callback);
+  this.active = false;
+}
+
+UI.Button.prototype.setActive = function(active)
+{
+  var method = (this.active = !!active) ? 'add' : 'remove';
+  this.content[method + 'ClassName']('active');
 }
 

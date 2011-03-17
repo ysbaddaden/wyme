@@ -23,13 +23,13 @@ WYME.prototype =
     this.toolbar = new UI.Toolbar();
     this.toolbar.initToolbar();
     
-    this.toolbar.addButton('bold',          'Bold',          this.setBold.bind(this));
-    this.toolbar.addButton('italic',        'Italic',        this.setItalic.bind(this));
-    this.toolbar.addButton('underline',     'Underline',     this.setUnderline.bind(this));
-    this.toolbar.addButton('strikethrough', 'Strikethrough', this.setStrikethrough.bind(this));
-    this.toolbar.addButton('link',          'Link',          this.insertLink.bind(this));
-    this.toolbar.addButton('image',         'Image',         this.insertImage.bind(this));
-    this.toolbar.addButton('toggle',        'Source',        this.toggleEditor.bind(this));
+    this.toolbar.addToggleButton('bold',          'Bold',          this.setBold.bind(this));
+    this.toolbar.addToggleButton('italic',        'Italic',        this.setItalic.bind(this));
+    this.toolbar.addToggleButton('underline',     'Underline',     this.setUnderline.bind(this));
+    this.toolbar.addToggleButton('strikethrough', 'Strikethrough', this.setStrikethrough.bind(this));
+    this.toolbar.addToggleButton('link',          'Link',          this.insertLink.bind(this));
+    this.toolbar.addToggleButton('image',         'Image',         this.insertImage.bind(this));
+    this.toolbar.addToggleButton('toggle',        'Source',        this.toggleEditor.bind(this));
     
     this.editor.appendChild(this.toolbar.getContent());
   },
