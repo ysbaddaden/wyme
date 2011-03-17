@@ -34,6 +34,19 @@ WYME.prototype =
     this.editor.appendChild(this.toolbar.getContent());
   },
 
+  buttonNames: function() {
+    return ['bold', 'italic', 'underline', 'strikethrough', 'link', 'image'];
+  },
+
+  defaultButtonStates: function()
+  {
+    var buttons = {}, names = this.buttonNames(), i;
+    for (i=0; i<names.length; i++) {
+      buttons[names[i]] = false;
+    }
+    return buttons;
+  },
+
   buildContents: function()
   {
     this.contents = document.createElement('div');
@@ -113,19 +126,12 @@ WYME.prototype =
   updateToolbarState: function()
   {
     var range, element, buttons, name;
-    try {
-      range = window.getSelection().getRangeAt(0);
-    }
-    catch (e) {
-      return;
-    }
+    
+    try { range = window.getSelection().getRangeAt(0); }
+    catch (e) { return; }
+    
     element = range.endContainer;
-    buttons = {
-      'bold':          false,
-      'italic':        false,
-      'underline':     false,
-      'strikethrough': false
-    }
+    buttons = this.defaultButtonStates();
     
     while (element && element.parentNode)
     {
@@ -134,26 +140,22 @@ WYME.prototype =
       if (element.nodeName == 'I') buttons['italic']        = true;
       if (element.nodeName == 'U') buttons['underline']     = true;
       if (element.nodeName == 'S') buttons['strikethrough'] = true;
+      if (element.nodeName == 'A') buttons['link']          = true;
+      if (element.nodeName == 'IMG') buttons['image']       = true;
     }
-    
-    for (name in buttons) {
+    this._setButtonsState(buttons);
+  },
+
+  _setButtonsState: function(buttons)
+  {
+    for (var name in buttons) {
       this.toolbar.getButton(name).setActive(buttons[name]);
     }
   },
 
   // Activates or deactivates toolbar buttons depending on the caret position.
-  resetToolbarState: function()
-  {
-    var buttons, name;
-    buttons = {
-      'bold':          false,
-      'italic':        false,
-      'underline':     false,
-      'strikethrough': false
-    }
-    for (name in buttons) {
-      this.toolbar.getButton(name).setActive(false);
-    }
+  resetToolbarState: function() {
+    this._setButtonsState(this.defaultButtonStates());
   },
 
   // Applies any given range.
@@ -249,6 +251,7 @@ WYME.prototype =
     {
       document.execCommand(command, showDefaultUI, valueArgument);
       this.updateTextarea();
+      this.updateToolbarState();
     }
   },
 

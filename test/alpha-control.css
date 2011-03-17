@@ -8,7 +8,7 @@ input, textarea {
   border: 1px solid #ada9a5;
 }
 input[type=submit] { width: inherit; }
-textarea { height: 80px; }
+textarea { height: 160px; }
 
 .dialog { background: #f2f1f0; color: #3c3c3c; border: 1px solid #888;
   border-radius: 5px 5px 0 0;
