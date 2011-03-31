@@ -27,6 +27,9 @@
   filter:      progid:DXImageTransform.Microsoft.gradient(startColorstr='#F4F3F1', endColorstr='#E0DEDD',GradientType=0);
 }
 
+.button.disabled { opacity: .5; }
+.button.disabled:hover { border-color: transparent; }
+
 .wyme > .toolbar .text { display: none; }
 .wyme > .toolbar .icon { display: inline-block; width: 16px; height: 16px; vertical-align: text-bottom; }
 .wyme > .toolbar .bold          .icon { background: url(icons/text_bold.png); }

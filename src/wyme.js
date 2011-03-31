@@ -42,20 +42,26 @@ WYME.prototype =
     this.toolbar.addToggleButton('toggle',        'Source',        this.toggleEditor.bind(this));
     
     this.editor.appendChild(this.toolbar.getContent());
+    this.disableToolbar(true);
   },
 
-  HTMLTags: function()
-  {
-    return {
-      'p':  'Paragraph',
-      'h1': 'Heading 1',
-      'h2': 'Heading 2',
-      'h3': 'Heading 3',
-    };
-  },
+//  HTMLTags: function()
+//  {
+//    return {
+//      'p':  'Paragraph',
+//      'h1': 'Heading 1',
+//      'h2': 'Heading 2',
+//      'h3': 'Heading 3',
+//    };
+//  },
 
   buttonNames: function() {
-    return ['bold', 'italic', 'underline', 'strikethrough', 'link', 'image'];
+    return [
+      'p', 'h1', 'h2', 'h3',
+      'bold', 'italic', 'underline', 'strikethrough',
+      'link', 'image',
+      'orderedlist', 'unorderedlist'
+    ];
   },
 
   defaultButtonStates: function()
@@ -156,21 +162,21 @@ WYME.prototype =
     while (element && element.parentNode)
     {
       element = element.parentNode;
-      if (element.nodeName == 'B') buttons['bold']          = true;
-      if (element.nodeName == 'I') buttons['italic']        = true;
-      if (element.nodeName == 'U') buttons['underline']     = true;
-      if (element.nodeName == 'S') buttons['strikethrough'] = true;
-      if (element.nodeName == 'A') buttons['link']          = true;
-      if (element.nodeName == 'IMG') buttons['image']       = true;
       
-//      if (element.nodeName == 'P')  tag = 'p';
-//      if (element.nodeName == 'H1') tag = 'h1';
-//      if (element.nodeName == 'H2') tag = 'h2';
-//      if (element.nodeName == 'H3') tag = 'h3';
+      if (element.nodeName == 'P')   buttons['p']             = true;
+      if (element.nodeName == 'H1')  buttons['h1']            = true;
+      if (element.nodeName == 'H2')  buttons['h2']            = true;
+      if (element.nodeName == 'H3')  buttons['h3']            = true;
+      if (element.nodeName == 'B')   buttons['bold']          = true;
+      if (element.nodeName == 'I')   buttons['italic']        = true;
+      if (element.nodeName == 'U')   buttons['underline']     = true;
+      if (element.nodeName == 'S')   buttons['strikethrough'] = true;
+      if (element.nodeName == 'A')   buttons['link']          = true;
+      if (element.nodeName == 'IMG') buttons['image']         = true;
     }
     this._setButtonsState(buttons);
 //    this.toolbar.getButton('tag').selectValue(tag);
-//    this.toolbar.setDisabled(false);
+    this.disableToolbar(false);
   },
 
   _setButtonsState: function(buttons)
@@ -186,7 +192,17 @@ WYME.prototype =
   resetToolbarState: function()
   {
     this._setButtonsState(this.defaultButtonStates());
-//    this.toolbar.setDisabled(true);
+    this.disableToolbar(true);
+  },
+
+
+  // Enables or disables the toolbar buttons.
+  disableToolbar: function(disabled)
+  {
+    var buttons = this.buttonNames();
+    for (var i=0; i<buttons.length; i++) {
+      this.toolbar.getButton(buttons[i]).setDisabled(disabled);
+    }
   },
 
   // Applies any given range.
