@@ -341,7 +341,7 @@ WYME.prototype =
 //    
 //    var element = start.previousElementSibling;
 //    var nodes = [];
-
+//    
 //    while (element)
 //    {
 //      element = element.nextElementSibling;
@@ -352,7 +352,7 @@ WYME.prototype =
 //      
 //      if (element == end) break;
 //    }
-
+//    
 //    start.parentNode.insertBefore(list, start);
 //    
 //    element = start;
@@ -362,7 +362,7 @@ WYME.prototype =
 //      element.parentNode.removeChild(element);
 //      element = sibling;
 //    }
-    
+//    
 //    do
 //    {
 //      var li = document.createElement('li');
@@ -382,8 +382,8 @@ WYME.prototype =
 //      element = sibling;
 //    }
 //    while (element && element.nextElementSibling != end);
-    
-    this.updateTextarea();
+//    
+//    this.updateTextarea();
   },
 
   setOrderedList:   function()
@@ -400,7 +400,6 @@ WYME.prototype =
   {
     if (this.checkSelection())
     {
-      console.log(command);
       document.execCommand(command, showDefaultUI, valueArgument);
       this.updateTextarea();
       this.updateToolbarState();
