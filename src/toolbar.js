@@ -20,6 +20,27 @@ UI.Toolbar.prototype.getButton = function(name) {
   return this.buttons[name];
 }
 
+UI.Toolbar.prototype.addSelect = function(name, options, callback)
+{
+  if (this.buttons[name]) {
+    throw new Error("Toolbar already has a button named '" + name + "'.");
+  }
+  var select = new UI.Select();
+  select.initSelect(name, options, callback);
+  
+  this.buttons[name] = select;
+  this.content.appendChild(select.getContent());
+  
+  return select;
+}
+
+UI.Toolbar.prototype.setDisabled = function(disabled)
+{
+  for (var name in this.buttons) {
+    this.buttons[name].setDisabled(disabled);
+  }
+}
+
 // :nodoc:
 UI.Toolbar.prototype._addButton = function(name, text, callback, toggle)
 {

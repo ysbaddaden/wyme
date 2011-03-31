@@ -23,15 +23,35 @@ WYME.prototype =
     this.toolbar = new UI.Toolbar();
     this.toolbar.initToolbar();
     
+//    this.toolbar.addSelect('tag', this.HTMLTags(), this.setTag.bind(this));
+    this.toolbar.addToggleButton('p',             'P',             this.setTag.bind(this));
+    this.toolbar.addToggleButton('h1',            'H1',            this.setTag.bind(this));
+    this.toolbar.addToggleButton('h2',            'H2',            this.setTag.bind(this));
+    this.toolbar.addToggleButton('h3',            'H3',            this.setTag.bind(this));
+    
     this.toolbar.addToggleButton('bold',          'Bold',          this.setBold.bind(this));
     this.toolbar.addToggleButton('italic',        'Italic',        this.setItalic.bind(this));
     this.toolbar.addToggleButton('underline',     'Underline',     this.setUnderline.bind(this));
     this.toolbar.addToggleButton('strikethrough', 'Strikethrough', this.setStrikethrough.bind(this));
     this.toolbar.addToggleButton('link',          'Link',          this.insertLink.bind(this));
     this.toolbar.addToggleButton('image',         'Image',         this.insertImage.bind(this));
+    
+    this.toolbar.addToggleButton('unorderedlist', 'Bullets',       this.setUnorderedList.bind(this));
+    this.toolbar.addToggleButton('orderedlist',   'Numbers',       this.setOrderedList.bind(this));
+    
     this.toolbar.addToggleButton('toggle',        'Source',        this.toggleEditor.bind(this));
     
     this.editor.appendChild(this.toolbar.getContent());
+  },
+
+  HTMLTags: function()
+  {
+    return {
+      'p':  'Paragraph',
+      'h1': 'Heading 1',
+      'h2': 'Heading 2',
+      'h3': 'Heading 3',
+    };
   },
 
   buttonNames: function() {
@@ -142,20 +162,31 @@ WYME.prototype =
       if (element.nodeName == 'S') buttons['strikethrough'] = true;
       if (element.nodeName == 'A') buttons['link']          = true;
       if (element.nodeName == 'IMG') buttons['image']       = true;
+      
+//      if (element.nodeName == 'P')  tag = 'p';
+//      if (element.nodeName == 'H1') tag = 'h1';
+//      if (element.nodeName == 'H2') tag = 'h2';
+//      if (element.nodeName == 'H3') tag = 'h3';
     }
     this._setButtonsState(buttons);
+//    this.toolbar.getButton('tag').selectValue(tag);
+//    this.toolbar.setDisabled(false);
   },
 
   _setButtonsState: function(buttons)
   {
-    for (var name in buttons) {
+    for (var name in buttons)
+    {
       this.toolbar.getButton(name).setActive(buttons[name]);
+//      this.toolbar.getButton('tag').selectValue('p');
     }
   },
 
   // Activates or deactivates toolbar buttons depending on the caret position.
-  resetToolbarState: function() {
+  resetToolbarState: function()
+  {
     this._setButtonsState(this.defaultButtonStates());
+//    this.toolbar.setDisabled(true);
   },
 
   // Applies any given range.
@@ -240,15 +271,120 @@ WYME.prototype =
 
   // toolbar events
 
-  setBold:          function() { this.setStyle('bold'); },
-  setItalic:        function() { this.setStyle('italic'); },
-  setUnderline:     function() { this.setStyle('underline'); },
+//  setTag: function(select)
+//  {
+//    if (this.checkSelection())
+//    {
+//      var tag   = select.getSelectedValue();
+//      var range = window.getSelection().getRangeAt(0);
+//      
+//      var node = range.startContainer;
+//      while (node && node.nodeName == '#text' && node.parentNode) {
+//        node = node.parentNode;
+//      }
+//      
+//      var element = document.createElement(tag);
+//      element.innerHTML = node.innerHTML;
+//      node.parentNode.insertBefore(element, node);
+//      node.parentNode.removeChild(node);
+//      
+//      this.updateTextarea();
+//    }
+//  },
+
+  setTag: function(button)
+  {
+    if (!this.checkSelection()) return;
+    
+    var tag   = button.name;
+    var range = window.getSelection().getRangeAt(0);
+    
+    var node = range.startContainer;
+    while (node && node.nodeName == '#text' && node.parentNode) {
+      node = node.parentNode;
+    }
+    
+    var element = document.createElement(tag);
+    element.innerHTML = node.innerHTML;
+    node.parentNode.replaceChild(element, node);
+//    node.parentNode.removeChild(node);
+    
+    this.updateTextarea();
+  },
+
+  setUnorderedList: function()
+  {
+//    if (!this.checkSelection()) return;
+    this.setStyle('insertunorderedlist');
+    
+//    var range = window.getSelection().getRangeAt(0);
+//    var start = range.startContainer.parentNode;
+//    var end   = range.endContainer.parentNode;
+//    
+//    var list = document.createElement('ul');
+//    
+//    var element = start.previousElementSibling;
+//    var nodes = [];
+
+//    while (element)
+//    {
+//      element = element.nextElementSibling;
+//      
+//      var li = document.createElement('li');
+//      li.innerHTML = element.innerHTML;
+//      list.appendChild(li);
+//      
+//      if (element == end) break;
+//    }
+
+//    start.parentNode.insertBefore(list, start);
+//    
+//    element = start;
+//    while (element)
+//    {
+//      var sibling = element.nextElementSibling;
+//      element.parentNode.removeChild(element);
+//      element = sibling;
+//    }
+    
+//    do
+//    {
+//      var li = document.createElement('li');
+//      li.innerHTML = element.innerHTML;
+//      list.appendChild(li);
+//      element = element.get('nextElementSibling');
+//    }
+//    while (element && element.nextElementSibling);
+//    
+//    start.parentNode.insertBefore(list, start);
+//    
+//    element = start;
+//    do
+//    {
+//      var sibling = element.nextElementSibling;
+//      element.parentNode.removeChild(element);
+//      element = sibling;
+//    }
+//    while (element && element.nextElementSibling != end);
+    
+    this.updateTextarea();
+  },
+
+  setOrderedList:   function()
+  {
+    this.setStyle('insertorderedlist');
+  },
+
+  setBold:          function() { this.setStyle('bold');          },
+  setItalic:        function() { this.setStyle('italic');        },
+  setUnderline:     function() { this.setStyle('underline');     },
   setStrikethrough: function() { this.setStyle('strikethrough'); },
 
   setStyle: function(command, showDefaultUI, valueArgument)
   {
     if (this.checkSelection())
     {
+      console.log(command);
       document.execCommand(command, showDefaultUI, valueArgument);
       this.updateTextarea();
       this.updateToolbarState();
